@@ -1,6 +1,6 @@
 from isaaclab.scene import InteractiveSceneCfg
 from isaaclab_assets.robots.unitree import UNITREE_GO2_CFG
-
+import torch
 from isaaclab.sensors import RayCasterCfg, patterns, ContactSensorCfg
 from isaaclab.utils import configclass
 from isaaclab.assets import ArticulationCfg, AssetBaseCfg
@@ -15,7 +15,7 @@ from isaacsim.core.utils.viewports import set_camera_view
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import go2.go2_ctrl as go2_ctrl
-
+from isaacsim.util.debug_draw import _debug_draw
 
 @configclass
 class Go2SimCfg(InteractiveSceneCfg):
@@ -159,6 +159,7 @@ class Go2RSLEnvCfg(ManagerBasedRLEnvCfg):
 
         # step settings
         self.decimation = 8  # step
+        # self.draw = _debug_draw.acquire_debug_draw_interface()
 
         # simulation settings
         self.sim.dt = 0.005  # sim step every 
@@ -187,3 +188,16 @@ def camera_follow(env):
             yaw_rotation.dot(np.asarray([-4.0, 0.0, 5.0])) + robot_position,
             robot_position
         )
+
+def debug_draw(draw, paths: torch.Tensor):
+    draw.clear_lines()
+    draw.clear_points()
+
+    def draw_single_traj(traj, color, size):
+        traj[:, 2] = torch.mean(traj[:, 2])
+        draw.draw_lines(traj[:-1].tolist(), traj[1:].tolist(), color * len(traj[1:]),
+                        size * len(traj[1:]))
+    for idx, path in enumerate(paths):
+        curr_path = torch.stack(paths[idx], dim=0)
+        draw_single_traj(curr_path, [(1.0, 0.4, 0.1, 1.0)], [30])
+        # self.draw.draw_points(goal.tolist(), self.color_path * len(goal), self.size * len(goal))

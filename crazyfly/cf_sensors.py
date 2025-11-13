@@ -15,7 +15,7 @@ class SensorManager:
             _, sensor = omni.kit.commands.execute(
                 "IsaacSensorCreateRtxLidar",
                 path="/lidar",
-                parent=f"/World/envs/env_{env_idx}/Go2/base",
+                parent=f"/World/envs/env_{env_idx}/CF/body",
                 config="Hesai_XT32_SD10",
                 # config="Velodyne_VLS128",
                 translation=(0.2, 0, 0.2),
@@ -32,15 +32,15 @@ class SensorManager:
         cameras = []
         for env_idx in range(self.num_envs):
             camera = Camera(
-                prim_path=f"/World/envs/env_{env_idx}/Go2/base/front_cam",
-                translation=np.array([0.4, 0.0, 0.2]),
-                frequency=freq,
+                prim_path=f"/World/envs/env_{env_idx}/CF/body/front_cam",
+                translation=np.array([0.2, 0.0, 0.06]),
+                frequency=10,
                 resolution=(160, 96),
                 orientation=rot_utils.euler_angles_to_quats(np.array([0, 0, 0]), degrees=True),
             )
             camera.initialize()
             camera.set_focal_length(2)
             camera.set_horizontal_aperture(4)
-            camera.set_clipping_range(0.001,10)  # 单位: 米
+            camera.set_clipping_range(0.001,20)  # 单位: 米
             cameras.append(camera)
         return cameras
